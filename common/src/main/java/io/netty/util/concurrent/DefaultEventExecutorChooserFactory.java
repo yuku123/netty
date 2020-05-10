@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Default implementation which uses simple round-robin to choose next {@link EventExecutor}.
  */
 @UnstableApi
+//县城管选择器
 public final class DefaultEventExecutorChooserFactory implements EventExecutorChooserFactory {
 
     public static final DefaultEventExecutorChooserFactory INSTANCE = new DefaultEventExecutorChooserFactory();
