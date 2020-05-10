@@ -257,6 +257,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     private ChannelFuture doBind(final SocketAddress localAddress) {
+        // 初始化并注册到selector
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
@@ -266,7 +267,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
-            doBind0(regFuture, channel, localAddress, promise);
+            doBind0(regFuture, channel, localAddress, promise); /**真正的绑定*/
             return promise;
         } else {
             // Registration future is almost always fulfilled already, but just in case it's not.
@@ -292,11 +293,16 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
     }
 
+    /**
+     * 创建channel
+     * 初始化channel
+     * 注册selector
+     * */
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
-            channel = channelFactory.newChannel();
-            init(channel);
+            channel = channelFactory.newChannel(); // 创建服务端channel
+            init(channel); // 针对创造出来的channel进行初始化
         } catch (Throwable t) {
             if (channel != null) {
                 // channel can be null if newChannel crashed (eg SocketException("too many open files"))
@@ -308,7 +314,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        ChannelFuture regFuture = config().group().register(channel);
+        // 注册
+        // AbstractChannel.register
+        //      this.eventLoop 绑定线程
+        //      register0 真正注册
+
+        // NioEventLoopGroup.register
+        ChannelFuture regFuture = config().group().register(channel);// 这个register方法会最终调用到
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
                 channel.close();
@@ -341,6 +353,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             @Override
             public void run() {
                 if (regFuture.isSuccess()) {
+                    // 真正的绑定
                     channel.bind(localAddress, promise).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {
                     promise.setFailure(regFuture.cause());

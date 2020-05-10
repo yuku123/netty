@@ -123,6 +123,12 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     @Override
     void init(Channel channel) {
+        // 设置属性
+        // 设置用户自定义属性
+        // 配置服务端的pipeline
+        // 添加连接器
+
+        // 得到用户自定义的option 和attrs
         setChannelOptions(channel, options0().entrySet().toArray(newOptionArray(0)), logger);
         setAttributes(channel, attrs0().entrySet().toArray(newAttrArray(0)));
 
@@ -130,6 +136,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         final EventLoopGroup currentChildGroup = childGroup;
         final ChannelHandler currentChildHandler = childHandler;
+
+        // 将用户自定义的childOptions和attributes设入
         final Entry<ChannelOption<?>, Object>[] currentChildOptions =
                 childOptions.entrySet().toArray(newOptionArray(0));
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));

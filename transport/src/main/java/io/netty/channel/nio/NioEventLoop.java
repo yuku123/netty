@@ -54,6 +54,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * {@link Selector} and so does the multi-plexing of these in the event loop.
  *
  */
+/**
+ * 默认netty 启动多少个线程？什么时候启动？
+ * jdk bug怎么解决
+ * 如何保证异步无锁串行化
+ * */
 public final class NioEventLoop extends SingleThreadEventLoop {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioEventLoop.class);

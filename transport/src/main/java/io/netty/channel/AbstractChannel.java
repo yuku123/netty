@@ -463,10 +463,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
+            // 简单的赋值操作，之后所有的io都将被这个操作
             AbstractChannel.this.eventLoop = eventLoop;
 
             if (eventLoop.inEventLoop()) {
-                register0(promise);
+                register0(promise);// 实际注册
             } else {
                 try {
                     eventLoop.execute(new Runnable() {
@@ -494,16 +495,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
-                doRegister();
+                doRegister(); // AbstractNioChannel
                 neverRegistered = false;
                 registered = true;
 
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
-                pipeline.invokeHandlerAddedIfNeeded();
+                pipeline.invokeHandlerAddedIfNeeded(); //会调用handler 触发增加事件
 
                 safeSetSuccess(promise);
-                pipeline.fireChannelRegistered();
+                pipeline.fireChannelRegistered(); //传播事件
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
@@ -548,7 +549,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
-                doBind(localAddress);
+                doBind(localAddress); // 底层的绑定
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
                 closeIfClosed();
@@ -561,7 +562,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     public void run() {
                         pipeline.fireChannelActive();
                     }
-                });
+                });// 传播
             }
 
             safeSetSuccess(promise);
