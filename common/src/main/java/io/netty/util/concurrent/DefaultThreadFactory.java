@@ -25,6 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A {@link ThreadFactory} implementation with a simple naming rule.
  */
+/**
+ * 一种线程构造器，参考线程池的接口，这个类单纯的为了创造命名化的线程工厂
+ * */
 public class DefaultThreadFactory implements ThreadFactory {
 
     private static final AtomicInteger poolId = new AtomicInteger();

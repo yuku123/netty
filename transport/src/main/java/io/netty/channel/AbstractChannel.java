@@ -495,16 +495,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
-                doRegister(); // AbstractNioChannel
+                doRegister(); // AbstractNioChannel -----1
                 neverRegistered = false;
                 registered = true;
 
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
-                pipeline.invokeHandlerAddedIfNeeded(); //会调用handler 触发增加事件
+                pipeline.invokeHandlerAddedIfNeeded(); //会调用handler 触发增加事件 ------2
 
                 safeSetSuccess(promise);
-                pipeline.fireChannelRegistered(); //传播事件
+                pipeline.fireChannelRegistered(); //传播事件 -----3
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
@@ -547,9 +547,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         "address (" + localAddress + ") anyway as requested.");
             }
 
-            boolean wasActive = isActive();
+            boolean wasActive = isActive(); // 启动的时候是false
             try {
-                doBind(localAddress); // 底层的绑定
+                doBind(localAddress); // 底层的绑定 NioServerSocketChannel
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
                 closeIfClosed();
@@ -562,7 +562,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     public void run() {
                         pipeline.fireChannelActive();
                     }
-                });// 传播
+                });// 传播 第一个handle是HeadContext.readIfIsAutoRead() 参考哦 DefaultChannelPipeline
             }
 
             safeSetSuccess(promise);

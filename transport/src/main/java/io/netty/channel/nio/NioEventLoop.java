@@ -458,8 +458,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     case SelectStrategy.BUSY_WAIT:
                         // fall-through to SELECT since the busy-wait is not supported with NIO
 
+                    // 检查有没有轮询事件
                     case SelectStrategy.SELECT:
-                        select(wakenUp.getAndSet(false));
+                        select(wakenUp.getAndSet(false));// 未唤醒状态
 
                         // 'wakenUp.compareAndSet(false, true)' is always evaluated
                         // before calling 'selector.wakeup()' to reduce the wake-up
@@ -508,10 +509,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 final int ioRatio = this.ioRatio;
                 if (ioRatio == 100) {
                     try {
-                        processSelectedKeys();
+                        processSelectedKeys(); // 处理io 这个地方做了些优化
                     } finally {
                         // Ensure we always run tasks.
-                        runAllTasks();
+                        runAllTasks(); // 处理外部连接 task分类和添加
                     }
                 } else {
                     final long ioStartTime = System.nanoTime();
@@ -655,6 +656,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 新连接入口
+     * */
     private void processSelectedKey(SelectionKey k, AbstractNioChannel ch) {
         final AbstractNioChannel.NioUnsafe unsafe = ch.unsafe();
         if (!k.isValid()) {
@@ -799,7 +803,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         try {
             int selectCnt = 0;
             long currentTimeNanos = System.nanoTime();
-            long selectDeadLineNanos = currentTimeNanos + delayNanos(currentTimeNanos);
+            long selectDeadLineNanos = currentTimeNanos + delayNanos(currentTimeNanos);// 不能超过这个截止时间
 
             long normalizedDeadlineNanos = selectDeadLineNanos - initialNanoTime();
             if (nextWakeupTime != normalizedDeadlineNanos) {
@@ -810,7 +814,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 long timeoutMillis = (selectDeadLineNanos - currentTimeNanos + 500000L) / 1000000L;
                 if (timeoutMillis <= 0) {
                     if (selectCnt == 0) {
-                        selector.selectNow();
+                        selector.selectNow(); // 非阻塞方法
                         selectCnt = 1;
                     }
                     break;
@@ -826,7 +830,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     break;
                 }
 
-                int selectedKeys = selector.select(timeoutMillis);
+                int selectedKeys = selector.select(timeoutMillis);// 阻塞的
                 selectCnt ++;
 
                 if (selectedKeys != 0 || oldWakenUp || wakenUp.get() || hasTasks() || hasScheduledTasks()) {
@@ -852,14 +856,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 }
 
                 long time = System.nanoTime();
+                // 没哟阻塞就返回了
                 if (time - TimeUnit.MILLISECONDS.toNanos(timeoutMillis) >= currentTimeNanos) {
                     // timeoutMillis elapsed without anything selected.
                     selectCnt = 1;
                 } else if (SELECTOR_AUTO_REBUILD_THRESHOLD > 0 &&
-                        selectCnt >= SELECTOR_AUTO_REBUILD_THRESHOLD) {
+                        selectCnt >= SELECTOR_AUTO_REBUILD_THRESHOLD) { //512的值
                     // The code exists in an extra method to ensure the method is not too big to inline as this
                     // branch is not very likely to get hit very frequently.
-                    selector = selectRebuildSelector(selectCnt);
+                    selector = selectRebuildSelector(selectCnt);// 避免空轮训，老的selectKey放到新的selectkey上
                     selectCnt = 1;
                     break;
                 }

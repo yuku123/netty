@@ -73,6 +73,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         }
 
         if (executor == null) {
+            // 默认的传入是没有线程的，在这个时候进行了初始化
             // newDefaultThreadFactory 线程工厂
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());// 创建线程执行器
         }

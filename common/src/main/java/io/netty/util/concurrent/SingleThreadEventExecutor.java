@@ -876,10 +876,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             throw new NullPointerException("task");
         }
 
+        // 判断当前执行的线程是否是eventLoop里面的线程
         boolean inEventLoop = inEventLoop();
         addTask(task);
-        if (!inEventLoop) {
-            startThread();
+        if (!inEventLoop) { //当前线程步子啊
+            startThread();// 启动线程
             if (isShutdown()) {
                 boolean reject = false;
                 try {
@@ -995,11 +996,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private static final long SCHEDULE_PURGE_INTERVAL = TimeUnit.SECONDS.toNanos(1);
 
     private void startThread() {
-        if (state == ST_NOT_STARTED) {
+        if (state == ST_NOT_STARTED) { // 判断是不是没有启动
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 boolean success = false;
                 try {
-                    doStartThread();
+                    doStartThread(); //开始线程
                     success = true;
                 } finally {
                     if (!success) {
@@ -1030,6 +1031,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private void doStartThread() {
         assert thread == null;
+        // threadPerTaskThread
         executor.execute(new Runnable() {
             @Override
             public void run() {

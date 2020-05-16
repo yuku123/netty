@@ -267,7 +267,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
-            doBind0(regFuture, channel, localAddress, promise); /**真正的绑定*/
+            doBind0(regFuture, channel, localAddress, promise); /**真正的绑定*/ //-> AbstractChannel.bind??????
             return promise;
         } else {
             // Registration future is almost always fulfilled already, but just in case it's not.
@@ -285,7 +285,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                         // See https://github.com/netty/netty/issues/2586
                         promise.registered();
 
-                        doBind0(regFuture, channel, localAddress, promise);
+                        doBind0(regFuture, channel, localAddress, promise); // 初始化的时候的入口
                     }
                 }
             });
@@ -349,6 +349,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
+        // 启动线层
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
