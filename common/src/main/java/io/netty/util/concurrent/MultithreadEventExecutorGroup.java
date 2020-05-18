@@ -78,6 +78,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());// 创建线程执行器
         }
 
+        // EventExecutor extends EventExecutorGroup
+        // 一个特殊的线程组
         children = new EventExecutor[nThreads];
 
         for (int i = 0; i < nThreads; i ++) {
@@ -110,6 +112,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             }
         }
 
+        // 提供next的
         chooser = chooserFactory.newChooser(children); // 创建线程选择器
 
         final FutureListener<Object> terminationListener = new FutureListener<Object>() {

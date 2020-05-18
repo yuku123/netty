@@ -937,7 +937,7 @@ public final class PlatformDependent {
      * consumer (one thread!) with the given fixes {@code capacity}.
      */
     public static <T> Queue<T> newFixedMpscQueue(int capacity) {
-        return hasUnsafe() ? new MpscArrayQueue<T>(capacity) : new MpscAtomicArrayQueue<T>(capacity);
+        return hasUnsafe() ? new MpscArrayQueue<T> (capacity) : new MpscAtomicArrayQueue<T>(capacity);
     }
 
     /**
